@@ -25,5 +25,9 @@ func main() {
 	wg.Add(1)
 	randomHandlers.StartListening(port, &wg)
 
+	basicAvoidHandlers := controllers.NewHandler(&engine.BasicAvoid{})
+	wg.Add(1)
+	basicAvoidHandlers.StartListening(port+1, &wg)
+
 	wg.Wait()
 }

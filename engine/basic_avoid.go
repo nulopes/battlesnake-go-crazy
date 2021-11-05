@@ -5,15 +5,15 @@ import (
 	"log"
 )
 
-// TotallyRandomEngine implements a simple game engine that does random things.
+// BasicAvoid implements a simple game engine that does random things.
 // It should die really fast ...
-type TotallyRandomEngine struct{}
+type BasicAvoid struct{}
 
-func (b *TotallyRandomEngine) Description() string {
-	return "Totally Random"
+func (b *BasicAvoid) Description() string {
+	return "Basic Avoid"
 }
 
-func (b *TotallyRandomEngine) Info() models.BattlesnakeInfoResponse {
+func (b *BasicAvoid) Info() models.BattlesnakeInfoResponse {
 	log.Println("INFO")
 	return models.BattlesnakeInfoResponse{
 		APIVersion: "1",
@@ -24,16 +24,18 @@ func (b *TotallyRandomEngine) Info() models.BattlesnakeInfoResponse {
 	}
 }
 
-func (b *TotallyRandomEngine) Start(state models.GameState) {
+func (b *BasicAvoid) Start(state models.GameState) {
 	log.Printf("START %s\n", state.Game.ID)
 }
 
-func (b *TotallyRandomEngine) Move(_ models.GameState) models.BattlesnakeMoveResponse {
+func (b *BasicAvoid) Move(state models.GameState) models.BattlesnakeMoveResponse {
 	moves := models.NewValidMoves()
+
+	state.NoCollisions(state.You, moves)
 
 	return models.BattlesnakeMoveResponse{Move: moves.Random(), Shout: ""}
 }
 
-func (b *TotallyRandomEngine) End(state models.GameState) {
+func (b *BasicAvoid) End(state models.GameState) {
 	log.Printf("END %s\n----------\n", state.Game.ID)
 }

@@ -1,5 +1,10 @@
 package models
 
+import (
+	"log"
+	"math/rand"
+)
+
 type GameState struct {
 	Game  Game        `json:"game"`
 	Turn  int         `json:"turn"`
@@ -47,6 +52,26 @@ type Coord struct {
 	Y int `json:"y"`
 }
 
+func (c Coord) Move(s string) Coord {
+	switch s {
+	case "up":
+		return Coord{X: c.X, Y: c.Y + 1}
+	case "down":
+		return Coord{X: c.X, Y: c.Y - 1}
+	case "right":
+		return Coord{X: c.X + 1, Y: c.Y}
+	case "left":
+		return Coord{X: c.X - 1, Y: c.Y}
+	}
+
+	log.Fatal("invalid coord move string", s)
+	return c
+}
+
+func (c Coord) Equals(other Coord) bool {
+	return c.X == other.X && c.Y == other.Y
+}
+
 type BattlesnakeInfoResponse struct {
 	APIVersion string `json:"apiversion"`
 	Author     string `json:"author"`
@@ -58,4 +83,47 @@ type BattlesnakeInfoResponse struct {
 type BattlesnakeMoveResponse struct {
 	Move  string `json:"move"`
 	Shout string `json:"shout,omitempty"`
+}
+
+type ValidMoves struct {
+	valid map[string]bool
+}
+
+func NewValidMoves() *ValidMoves {
+	return &ValidMoves{valid: map[string]bool{"up": true, "right": true, "down": true, "left": true}}
+}
+
+func (v *ValidMoves) isValid(s string) bool {
+	valid, ok := v.valid[s]
+	if !ok {
+		log.Fatal("missuse of valid", s)
+	}
+	return valid
+}
+
+func (v *ValidMoves) unset(s string) {
+	if _, ok := v.valid[s]; !ok {
+		log.Fatal("missuse of valid", s)
+	}
+	v.valid[s] = false
+}
+
+func (v *ValidMoves) ValidList() []string {
+	possible := make([]string, 0, 4)
+
+	for k, v := range v.valid {
+		if v {
+			possible = append(possible, k)
+		}
+	}
+	return possible
+}
+
+func (v *ValidMoves) Random() string {
+	possible := v.ValidList()
+
+	if len(possible) == 0 {
+		return "up"
+	}
+	return possible[rand.Intn(len(possible))]
 }
