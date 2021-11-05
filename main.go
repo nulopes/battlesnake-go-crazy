@@ -4,23 +4,26 @@ import (
 	"battlesnake-go-crazy/controllers"
 	"battlesnake-go-crazy/engine"
 	"log"
-	"net/http"
 	"os"
+	"strconv"
+	"sync"
 )
 
 func main() {
-	port := os.Getenv("PORT")
-	if len(port) == 0 {
-		port = "8081"
+	portEnv := os.Getenv("PORT")
+	if len(portEnv) == 0 {
+		portEnv = "8081"
 	}
 
-	handlers := controllers.NewHandler(&engine.TotallyRandomEngine{})
+	port, err := strconv.Atoi(portEnv)
+	if err != nil {
+		log.Fatal("Invalid port given: ", portEnv)
+	}
 
-	http.HandleFunc("/", handlers.HandleIndex)
-	http.HandleFunc("/start", handlers.HandleStart)
-	http.HandleFunc("/move", handlers.HandleMove)
-	http.HandleFunc("/end", handlers.HandleEnd)
+	var wg sync.WaitGroup
+	randomHandlers := controllers.NewHandler(&engine.TotallyRandomEngine{})
+	wg.Add(1)
+	randomHandlers.StartListening(port, &wg)
 
-	log.Printf("Starting Battlesnake Server at http://0.0.0.0:%s...\n", port)
-	log.Fatal(http.ListenAndServe(":"+port, nil))
+	wg.Wait()
 }

@@ -4,8 +4,10 @@ import (
 	"battlesnake-go-crazy/engine"
 	"battlesnake-go-crazy/models"
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
+	"sync"
 )
 
 type Handler struct {
@@ -14,6 +16,20 @@ type Handler struct {
 
 func NewHandler(engine engine.Engine) *Handler {
 	return &Handler{engine: engine}
+}
+
+func (h *Handler) StartListening(port int, wg *sync.WaitGroup) {
+	mux := http.NewServeMux()
+	mux.HandleFunc("/", h.HandleIndex)
+	mux.HandleFunc("/start", h.HandleStart)
+	mux.HandleFunc("/move", h.HandleMove)
+	mux.HandleFunc("/end", h.HandleEnd)
+
+	log.Printf("Starting %s Battlesnake Server at http://0.0.0.0:%d...\n", h.engine.Description(), port)
+	go func() {
+		defer wg.Done()
+		log.Fatal(http.ListenAndServe(fmt.Sprintf(":%d", port), mux))
+	}()
 }
 
 func (h *Handler) HandleIndex(w http.ResponseWriter, _ *http.Request) {

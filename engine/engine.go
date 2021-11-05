@@ -7,4 +7,5 @@ type Engine interface {
 	Start(state models.GameState)
 	Move(state models.GameState) models.BattlesnakeMoveResponse
 	End(state models.GameState)
+	Description() string
 }

@@ -10,6 +10,10 @@ import (
 // It should die really fast ...
 type TotallyRandomEngine struct{}
 
+func (b *TotallyRandomEngine) Description() string {
+	return "Totally Random"
+}
+
 func (b *TotallyRandomEngine) Info() models.BattlesnakeInfoResponse {
 	log.Println("INFO")
 	return models.BattlesnakeInfoResponse{
